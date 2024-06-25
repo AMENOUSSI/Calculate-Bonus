@@ -2,65 +2,85 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Product;
 use App\Models\Sale;
 use App\Http\Requests\StoreSaleRequest;
 use App\Http\Requests\UpdateSaleRequest;
+use Illuminate\Support\Facades\Request;
 
 class SaleController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        //
+        $sales = Sale::with(['user', 'product'])->get();
+        return view('sales.index', compact('sales'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
-        //
+        $users = User::all();
+        $products = Product::all();
+        return view('sales.create', compact('users', 'products'));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(StoreSaleRequest $request)
+    public function store(Request $request)
     {
-        //
+        $request->validate([
+            'user_id' => 'required|exists:users,id',
+            'product_id' => 'required|exists:products,id',
+            'quantity' => 'required|integer|min:1',
+        ]);
+
+        $product = Product::find($request->product_id);
+        $totalPrice = $product->price * $request->quantity;
+
+        Sale::create([
+            'user_id' => $request->user_id,
+            'product_id' => $request->product_id,
+            'quantity' => $request->quantity,
+            'total_price' => $totalPrice,
+        ]);
+
+        return redirect()->route('sales.index')->with('success', 'Sale created successfully.');
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show(Sale $sale)
     {
-        //
+        return view('sales.show', compact('sale'));
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit(Sale $sale)
     {
-        //
+        $users = User::all();
+        $products = Product::all();
+        return view('sales.edit', compact('sale', 'users', 'products'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(UpdateSaleRequest $request, Sale $sale)
+    public function update(Request $request, Sale $sale)
     {
-        //
+        $request->validate([
+            'user_id' => 'required|exists:users,id',
+            'product_id' => 'required|exists:products,id',
+            'quantity' => 'required|integer|min:1',
+        ]);
+
+        $product = Product::find($request->product_id);
+        $totalPrice = $product->price * $request->quantity;
+
+        $sale->update([
+            'user_id' => $request->user_id,
+            'product_id' => $request->product_id,
+            'quantity' => $request->quantity,
+            'total_price' => $totalPrice,
+        ]);
+
+        return redirect()->route('sales.index')->with('success', 'Sale updated successfully.');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(Sale $sale)
     {
-        //
+        $sale->delete();
+
+        return redirect()->route('sales.index')->with('success', 'Sale deleted successfully.');
     }
 }

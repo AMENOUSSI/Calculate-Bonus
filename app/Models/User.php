@@ -20,8 +20,8 @@ class User extends Authenticatable
     protected $fillable = [
         'first_name',
         'last_name',
-        /*'identity_reference',
-        'registration_number',*/
+        'identity_reference',
+        'registration_number',
         'sponsor_id',
         'email',
         'password',
@@ -46,4 +46,24 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
     ];
+
+    public function sponsor()
+    {
+        return $this->belongsTo(User::class, 'sponsor_id');
+    }
+
+    /**
+     * Get the users sponsored by this user.
+     */
+    public function sponsoredUsers()
+    {
+        return $this->hasMany(User::class, 'sponsor_id');
+    }
+
+
+
+    public function calculateBonus()
+    {
+        return Bonus::calculateBonus($this);
+    }
 }

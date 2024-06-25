@@ -18,9 +18,10 @@ class RegisteredUserController extends Controller
     /**
      * Display the registration view.
      */
-    public function create(): View
+    public function create()
     {
-        return view('auth.register');
+        $sponsors = User::all(); // Fetch all users to be potential sponsors
+        return view('auth.register', compact('sponsors'));
     }
 
     /**
@@ -33,15 +34,19 @@ class RegisteredUserController extends Controller
         $request->validate([
             'first_name' => ['required', 'string', 'max:255'],
             'last_name' => ['required', 'string', 'max:255'],
-            /*'identity_reference' => ['required','string'],
-            'registration_number' => ['required','string','unique:'.User::class],*/
-            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
+            'identity_reference' => ['required', 'string', 'max:255', 'unique:users'],
+            'registration_number' => ['required', 'string', 'max:255', 'unique:users'],
+            'sponsor_id' => ['nullable', 'exists:users,id'],
+            'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
 
         $user = User::create([
             'first_name' => $request->first_name,
             'last_name' => $request->last_name,
+            'identity_reference' => $request->identity_reference,
+            'registration_number' => $request->registration_number,
+            'sponsor_id' => $request->sponsor_id,
             'email' => $request->email,
             'password' => Hash::make($request->password),
         ]);

@@ -16,10 +16,9 @@ return new class extends Migration
 
             $table->string('first_name');
             $table->string('last_name');
-            $table->string('identity_reference')->unique()->nullable();
-            $table->string('registration_number')->unique()->nullable();
+            $table->string('identity_reference')->unique();
+            $table->string('registration_number')->unique();
             $table->unsignedBigInteger('sponsor_id')->nullable();
-
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
